@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skin Cancer Detection Using Deep Learning </title>
+    <header>Ronak Ithape</header>
+    
+    <style>
+       body {
+         background-image: url("images.jpeggh");
+         background-size: cover;
+         background-position: center;
+         background-attachment: fixed;
+       }
+
+       #selectedImageContainer {
+          max-width: 300px; /* Adjust the width as needed */
+          max-height: 300px; /* Adjust the height as needed */
+          margin: 20px auto; /* Center the container */
+          overflow: hidden; /* Ensure the image doesn't overflow */
+        }
+        #selectedImage {
+        color: #fff; /* Set text color to white */
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('bak.jpg'); /* Replace 'your-background-image.jpg' with the path to your background image */
+            background-size: cover;
+            background-position: center;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            background-color: #0d0d0efa;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(12, 12, 12, 0.933);
+        }
+        h1 {
+            text-align: center;
+            color: #f9f6f6;
+        }
+        form {
+            text-align: center;
+            margin-top: 20px;
+        }
+        input[type="file"] {
+            display: none;
+        }
+        label.upload-label {
+            background-color: #0056b3;
+            color: #050505;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        label.upload-label:hover {
+            background-color: #0056b3;
+        }
+        button[type="submit"] {
+            background-color: #218838;
+            color: #0a0a0a;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button[type="submit"]:hover {
+            background-color: #218838;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 5px;
+            display: none;
+        }
+        #result h2 {
+            margin-bottom: 10px;
+        }
+        .prediction {
+            font-size: 18px;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .result-cancer {
+            background-color: #fafffb;
+            color: #101010;
+        }
+        .result-error {
+            background-color: #dc3545;
+            color: #060606;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Skin Cancer Detection System</h1>
+        <form id="uploadForm" action="/predict" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" id="fileInput" accept="image/*">
+            <label for="fileInput" class="upload-label">Choose Image</label>
+            <span id="selectedImage"></span>
+            <button type="submit">Predict</button>
+        </form>
+        <div id="result">
+            <h2>Prediction Result:</h2>
+            <div id="selectedImageContainer">
+                <img id="selectedImageView" src="#" alt="Selected Image" style="max-width: 100%;">
+            </div>
+            <div id="predictionResult"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('fileInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            const fileName = file.name;
+            const fileReader = new FileReader();
+            fileReader.onload = function(e) {
+                document.getElementById('selectedImageView').src = e.target.result;
+            }
+            fileReader.readAsDataURL(file);
+            document.getElementById('selectedImage').innerText = `Selected Image: ${fileName}`;
+        });
+
+        document.getElementById('uploadForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            const response = await fetch('/predict', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            const predictionResult = document.getElementById('predictionResult');
+            predictionResult.innerHTML = '';
+            if (result.result === "Skin cancer detected") {
+                predictionResult.innerHTML += `<div class="prediction result-cancer"><strong>Result:</strong> ${result.result}</div>`;
+                if (result.cancer_type) {
+                    predictionResult.innerHTML += `<div class="prediction result-cancer"><strong>Cancer Type:</strong> ${result.cancer_type}</div>`;
+                }
+            } else {
+                predictionResult.innerHTML += `<div class="prediction result-error"><strong>Error:</strong> ${result.error}</div>`;
+            }
+            document.getElementById('result').style.display = 'block';
+        });
+    </script>
+</body>
+</html>
